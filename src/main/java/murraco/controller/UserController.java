@@ -4,6 +4,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +28,10 @@ import murraco.dto.UserResponseDTO;
 import murraco.model.User;
 import murraco.service.UserService;
 
+import java.util.ArrayList;
+import java.util.List;
+import murraco.repository.UserRepository;
+
 @RestController
 @RequestMapping("/users")
 @Api(tags = "users")
@@ -35,6 +42,9 @@ public class UserController {
 
   @Autowired
   private ModelMapper modelMapper;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @PostMapping("/signin")
   @ApiOperation(value = "${UserController.signin}")
@@ -97,6 +107,24 @@ public class UserController {
   @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
   public String refresh(HttpServletRequest req) {
     return userService.refresh(req.getRemoteUser());
+  }
+
+  @GetMapping("/users")
+  @ApiOperation(value = "${UserController.listUsers}")
+  public List<User> listUsers(
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size
+  ) {
+    Page<User> pageData = userRepository.findAll(PageRequest.of(page,size, Sort.by("id").descending()));
+    System.out.println("-----------------------");
+    System.out.println("-----------------------");
+    List<User> users = new ArrayList<>();
+    if(pageData.hasContent()) {
+      return pageData.getContent();
+    }else {
+      return users;
+    }
+//    return userRepository.findAll();
   }
 
 }

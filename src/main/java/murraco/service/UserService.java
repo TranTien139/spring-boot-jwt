@@ -1,6 +1,7 @@
 package murraco.service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,10 @@ public class UserService {
 
   public User whoami(HttpServletRequest req) {
     return userRepository.findByUsername(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(req)));
+  }
+
+  public List<User> getAllUser(HttpServletRequest req) {
+    return userRepository.findAll();
   }
 
   public String refresh(String username) {
